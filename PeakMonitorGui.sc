@@ -8,12 +8,12 @@ PeakMonitorGui : ObjectGui {
 		// so the model variable is already nil and .remove doesn't clean up the model
 		// I'll keep the model in a variable that crucial doesn't know about
 	var	myModel;
-	
+
 	guiBody { arg lay;
 		lay.startRow;
 		leftFlow = FlowView(lay, Rect(0, 0, model.numChannels * 13 + 10, 210), margin: 2@2);
 		multiSl = GUI.multiSliderView.new(leftFlow, Rect(0, 0, model.numChannels * 13 + 2, 200));
-		
+
 		rightFlow = FlowView(lay, Rect(0, 0,
 				// ax + b(x-1) = ax + bx - b = (a+b)x - b
 			max((lay.decorator.gap.x + 50) * model.numChannels - lay.decorator.gap.x + 10, 210),
@@ -35,16 +35,16 @@ PeakMonitorGui : ObjectGui {
 		});
 		rightFlow.startRow;
 		maxRecentView = GUI.textView.new(rightFlow, Rect(0, 0, 200, 100));
-		
+
 		maxClip = 0 ! model.numChannels;
 		recentSize = model.freq*2;
 		maxRecent = Array.new(recentSize);
 		myModel = model;
 	}
-	
+
 	update {
 		var newpeaks, str;
-		newpeaks = model.peaks.collect({ arg p, i; 
+		newpeaks = model.peaks.collect({ arg p, i;
 			(p > maxClip[i]).if({ maxClip[i] = p });
 			((p = p.abs) > 1).if({
 				{ if(multiSl.notClosed) { clipButtons.at(i).value_(1) } }.defer;
@@ -60,12 +60,12 @@ PeakMonitorGui : ObjectGui {
 		});
 		{
 			if(multiSl.notClosed) {
-				multiSl.value_(newpeaks.sqrt);
+				multiSl.value_(newpeaks.ampdb.linlin(-60, 0, 0, 1));
 				maxRecentView.setString(str, 0, maxRecentView.string.size);
 			};
 		}.defer;
 	}
-	
+
 	remove {
 		var	tempModel = myModel;
 		if(myModel.notNil) {
@@ -75,5 +75,5 @@ PeakMonitorGui : ObjectGui {
 			tempModel.free;
 		}
 	}
-	
+
 }
